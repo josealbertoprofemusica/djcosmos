@@ -1,0 +1,317 @@
+/* ============================================
+   BIOGRAPHY PAGE STYLES
+   ============================================ */
+
+/* ============================================
+   HERO SECTION
+   ============================================ */
+.hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    padding-top: var(--space-3xl);
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 107, 107, 0.1) 0%, transparent 70%);
+    animation: float 20s ease-in-out infinite;
+}
+
+.hero::after {
+    content: '';
+    position: absolute;
+    bottom: -50%;
+    left: -50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(78, 205, 196, 0.1) 0%, transparent 70%);
+    animation: float 25s ease-in-out infinite reverse;
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+
+    33% {
+        transform: translate(30px, -30px) rotate(120deg);
+    }
+
+    66% {
+        transform: translate(-20px, 20px) rotate(240deg);
+    }
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    max-width: 800px;
+}
+
+.hero-image-wrapper {
+    margin-bottom: var(--space-xl);
+    position: relative;
+    display: inline-block;
+}
+
+.hero-image {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid transparent;
+    background: var(--color-accent-gradient);
+    padding: 4px;
+    animation: pulse 3s ease-in-out infinite;
+    box-shadow: var(--shadow-glow);
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.hero-subtitle {
+    font-size: var(--text-xl);
+    color: var(--color-accent-secondary);
+    font-weight: 600;
+    margin-bottom: var(--space-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.hero-title {
+    font-size: var(--text-6xl);
+    margin-bottom: var(--space-md);
+    line-height: 1.1;
+}
+
+.hero-description {
+    font-size: var(--text-lg);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-xl);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hero-cta {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* ============================================
+   BIOGRAPHY SECTION
+   ============================================ */
+.biography-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2xl);
+    align-items: center;
+}
+
+.biography-text p {
+    font-size: var(--text-lg);
+    line-height: 1.8;
+}
+
+.biography-image {
+    width: 100%;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+}
+
+/* ============================================
+   TIMELINE
+   ============================================ */
+.timeline {
+    position: relative;
+    padding-left: var(--space-xl);
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--color-accent-gradient);
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: var(--space-2xl);
+    padding-left: var(--space-xl);
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -26px;
+    top: 8px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--color-accent-primary);
+    border: 3px solid var(--color-bg-primary);
+    box-shadow: 0 0 0 4px var(--color-bg-glass);
+}
+
+.timeline-date {
+    font-size: var(--text-sm);
+    color: var(--color-accent-secondary);
+    font-weight: 600;
+    margin-bottom: var(--space-xs);
+}
+
+.timeline-title {
+    font-size: var(--text-xl);
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-xs);
+}
+
+.timeline-subtitle {
+    font-size: var(--text-base);
+    color: var(--color-accent-primary);
+    margin-bottom: var(--space-sm);
+}
+
+.timeline-description {
+    color: var(--color-text-secondary);
+    line-height: 1.7;
+}
+
+/* ============================================
+   SKILLS GRID
+   ============================================ */
+.skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--space-lg);
+}
+
+.skill-card {
+    text-align: center;
+}
+
+.skill-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto var(--space-md);
+    background: var(--color-accent-gradient);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-3xl);
+    transition: all var(--transition-base);
+}
+
+.skill-card:hover .skill-icon {
+    transform: rotate(5deg) scale(1.1);
+}
+
+.skill-name {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    margin-bottom: var(--space-sm);
+}
+
+.skill-description {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+}
+
+/* ============================================
+   CONTACT SECTION
+   ============================================ */
+.contact-content {
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.contact-links {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: var(--space-xl);
+}
+
+.contact-link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md) var(--space-lg);
+    background: var(--color-bg-glass);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    transition: all var(--transition-base);
+    font-weight: 500;
+}
+
+.contact-link:hover {
+    background: var(--color-bg-glass-hover);
+    border-color: var(--color-accent-primary);
+    transform: translateY(-2px);
+}
+
+.contact-icon {
+    font-size: var(--text-xl);
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: var(--text-4xl);
+    }
+
+    .biography-content {
+        grid-template-columns: 1fr;
+    }
+
+    .skills-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-cta {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-image {
+        width: 150px;
+        height: 150px;
+    }
+}
