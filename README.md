@@ -83,4 +83,4 @@ djcosmos/
 
 ## License
 
-© 2025 Maestro José Alberto. All rights reserved.
+© 2025 José Alberto Amador Fernández.
