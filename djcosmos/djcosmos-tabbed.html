@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DJ Cosmos - Sinfonía Planetaria</title>
+    <!-- Carga de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carga de la biblioteca Tone.js para síntesis de audio -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <!-- External CSS -->
+    <link rel="stylesheet" href="djcosmos.css">
+    <style>
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body class="min-h-screen p-4 sm:p-8">
+
+    <div class="max-w-5xl mx-auto">
+        <!-- Tab Navigation -->
+        <div class="flex justify-center mb-8 space-x-4">
+            <button onclick="switchTab('v1')" id="tab-v1"
+                class="tab-button active px-8 py-3 font-bold text-lg rounded-full shadow-lg text-white backdrop-blur-sm border border-blue-500/30">
+                Version 1
+            </button>
+            <button onclick="switchTab('v2')" id="tab-v2"
+                class="tab-button px-8 py-3 font-bold text-lg rounded-full shadow-lg text-white bg-gray-700/50 hover:bg-gray-600/50 backdrop-blur-sm border border-gray-500/30">
+                Version 2
+            </button>
+            <button onclick="switchTab('v3')" id="tab-v3"
+                class="tab-button px-8 py-3 font-bold text-lg rounded-full shadow-lg text-white bg-gray-700/50 hover:bg-gray-600/50 backdrop-blur-sm border border-gray-500/30">
+                Version 3
+            </button>
+        </div>
+
+        <!-- Version 1 Content -->
+        <div id="content-v1" class="tab-content active">
+            <iframe src="djcosmos.html" class="w-full" style="height: calc(100vh - 200px); border: none;"></iframe>
+        </div>
+
+        <!-- Version 2 Content -->
+        <div id="content-v2" class="tab-content">
+            <div class="glass-panel p-8 rounded-xl shadow-2xl text-center">
+                <h1
+                    class="text-4xl sm:text-5xl font-extrabold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400 drop-shadow-lg">
+                    DJ Cosmos Version 2
+                </h1>
+                <p class="text-gray-300 text-lg mb-6">
+                    Esta versión está en desarrollo. Próximamente nuevas características y mejoras.
+                </p>
+                <div class="bg-gray-800/50 p-6 rounded-lg border border-gray-600/50">
+                    <h2 class="text-xl font-semibold text-cyan-300 mb-3">Características Planificadas:</h2>
+                    <ul class="text-left text-gray-300 space-y-2">
+                        <li>✨ Nueva interfaz de visualización</li>
+                        <li>🎵 Modos de síntesis adicionales</li>
+                        <li>🌍 Más objetos celestes</li>
+                        <li>🎨 Temas personalizables</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Version 3 Content -->
+        <div id="content-v3" class="tab-content">
+            <div class="glass-panel p-8 rounded-xl shadow-2xl text-center">
+                <h1
+                    class="text-4xl sm:text-5xl font-extrabold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-emerald-400 drop-shadow-lg">
+                    DJ Cosmos Version 3
+                </h1>
+                <p class="text-gray-300 text-lg mb-6">
+                    La versión más avanzada. Experimenta con las últimas innovaciones en sonificación espacial.
+                </p>
+                <div class="bg-gray-800/50 p-6 rounded-lg border border-gray-600/50">
+                    <h2 class="text-xl font-semibold text-cyan-300 mb-3">Características Experimentales:</h2>
+                    <ul class="text-left text-gray-300 space-y-2">
+                        <li>🚀 Integración con datos en tiempo real de la NASA</li>
+                        <li>🎼 Composición automática basada en IA</li>
+                        <li>🌌 Visualización 3D interactiva</li>
+                        <li>💫 Efectos de audio espacial inmersivo</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(version) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+                button.classList.add('bg-gray-700/50', 'hover:bg-gray-600/50');
+                button.classList.remove('bg-gradient-to-r', 'from-blue-400', 'to-cyan-400');
+            });
+
+            // Show selected tab content
+            document.getElementById(`content-${version}`).classList.add('active');
+
+            // Activate selected button
+            const activeButton = document.getElementById(`tab-${version}`);
+            activeButton.classList.add('active');
+            activeButton.classList.remove('bg-gray-700/50', 'hover:bg-gray-600/50');
+        }
+    </script>
+</body>
+
+</html>
