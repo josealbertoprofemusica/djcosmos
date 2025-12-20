@@ -9,92 +9,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Carga de la biblioteca Tone.js para síntesis de audio -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
-    <style>
-        /* Estilos personalizados */
-        body {
-            font-family: 'Inter', sans-serif;
-            background-image:
-                linear-gradient(rgba(13, 17, 23, 0.85), rgba(13, 17, 23, 0.7)),
-                url('https://upload.wikimedia.org/wikipedia/commons/6/69/NASA-HS201427a-HubbleUltraDeepField2014-20140603.jpg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            color: #e2e8f0;
-        }
+    <!-- External CSS -->
+    <link rel="stylesheet" href="djcosmos.css">
 
-        .planet-btn {
-            transition: all 0.2s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            border: 2px solid transparent;
-            backdrop-filter: blur(4px);
-        }
-
-        .planet-btn.active {
-            transform: scale(1.05);
-            border-width: 3px;
-            border-color: #3b82f6;
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: #3b82f6;
-            cursor: pointer;
-            box-shadow: 0 0 8px #3b82f6;
-        }
-
-        .loading-ring {
-            border: 4px solid rgba(255, 255, 255, 0.2);
-            border-top: 4px solid #3b82f6;
-            border-radius: 50%;
-            width: 16px;
-            height: 16px;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        .dynamic-table-row:nth-child(even) {
-            background-color: rgba(31, 41, 55, 0.6);
-        }
-
-        .glass-panel {
-            background-color: rgba(17, 24, 39, 0.75);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .eyes-container {
-            position: relative;
-            width: 100%;
-            height: 500px;
-            overflow: hidden;
-            border-radius: 0.75rem;
-            background-color: rgba(0, 0, 0, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .eyes-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-    </style>
 </head>
 
 <body class="min-h-screen p-4 sm:p-8">
@@ -252,7 +169,8 @@
 
             <div class="glass-panel p-6 rounded-xl shadow-2xl">
                 <h2 class="text-xl font-semibold mb-4 text-cyan-300 drop-shadow-sm text-center">5. Análisis Dinámico de
-                    <span id="currentPlanetName"></span></h2>
+                    <span id="currentPlanetName"></span>
+                </h2>
                 <div class="overflow-x-auto">
                     <table id="physicalParams"
                         class="w-full text-sm text-left text-gray-300 rounded-lg overflow-hidden border border-gray-700">

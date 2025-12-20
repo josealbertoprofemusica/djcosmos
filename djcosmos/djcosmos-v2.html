@@ -4,33 +4,694 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sinfonía Planetaria V2: Sonificación del Sistema Solar</title>
+    <title>Sinfonía Planetaria: Sonificación del Sistema Solar</title>
     <!-- Carga de Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Carga de la biblioteca Tone.js para síntesis de audio -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
-    <!-- External CSS -->
-    <link rel="stylesheet" href="djcosmos.css">
+    <style>
+        /* Estilos personalizados */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-image:
+                linear-gradient(rgba(13, 17, 23, 0.85), rgba(13, 17, 23, 0.7)),
+                url('https://upload.wikimedia.org/wikipedia/commons/6/69/NASA-HS201427a-HubbleUltraDeepField2014-20140603.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #e2e8f0;
+        }
 
+        .planet-btn {
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            border: 2px solid transparent;
+            backdrop-filter: blur(4px);
+        }
+
+        .planet-btn.active {
+            transform: scale(1.05);
+            border-width: 3px;
+            border-color: #3b82f6;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            box-shadow: 0 0 8px #3b82f6;
+        }
+
+        .loading-ring {
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .dynamic-table-row:nth-child(even) {
+            background-color: rgba(31, 41, 55, 0.6);
+        }
+
+        .glass-panel {
+            background-color: rgba(17, 24, 39, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .eyes-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            overflow: hidden;
+            border-radius: 0.75rem;
+            background-color: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .eyes-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
 </head>
 
 <body class="min-h-screen p-4 sm:p-8">
 
     <div class="max-w-5xl mx-auto">
         <h1
-            class="text-4xl sm:text-5xl font-extrabold text-center mb-2 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400 drop-shadow-lg">
-            Sinfonía Planetaria V2
+            class="text-4xl sm:text-5xl font-extrabold text-center mb-2 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400 drop-shadow-lg">
+            Sinfonía Planetaria: Sonificación
         </h1>
         <p class="text-center text-sm mb-8 text-gray-300 drop-shadow-md">
-            Paste your V2 code here
+            Escucha y manipula las características de cada planeta mapeadas a música en tiempo real.
         </p>
 
-        <!-- YOUR V2 CONTENT GOES HERE -->
+        <!-- Controles Principales -->
+        <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4 mb-8">
+            <button id="playStopBtn"
+                class="px-6 py-3 w-full sm:w-auto font-bold text-lg rounded-full shadow-lg transition duration-200 bg-green-600/90 hover:bg-green-700 text-white flex items-center justify-center space-x-2 backdrop-blur-sm border border-green-500/30">
+                <svg id="playIcon" class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                        d="M6.3 5.3a1 1 0 011.4 0l4 4a1 1 0 010 1.4l-4 4a1 1 0 01-1.4-1.4L9.586 10 6.3 6.7a1 1 0 010-1.4z"
+                        clip-rule="evenodd" fill-rule="evenodd"></path>
+                </svg>
+                <svg id="stopIcon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M5 5a1 1 0 011-1h8a1 1 0 011 1v8a1 1 0 01-1 1H6a1 1 0 01-1-1V5z" clip-rule="evenodd"
+                        fill-rule="evenodd"></path>
+                </svg>
+                <span id="playStopText">Reproducir</span>
+            </button>
 
+            <button id="exportLoopBtn"
+                class="px-6 py-3 w-full sm:w-auto font-bold text-lg rounded-full shadow-lg transition duration-200 bg-blue-600/80 hover:bg-blue-700 text-white flex items-center justify-center space-x-2 backdrop-blur-sm border border-blue-500/30">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
+                <span id="exportLoopText">Exportar Bucle (WAV)</span>
+            </button>
+
+            <button id="exportMidiBtn"
+                class="px-6 py-3 w-full sm:w-auto font-bold text-lg rounded-full shadow-lg transition duration-200 bg-purple-600/90 hover:bg-purple-700 text-white flex items-center justify-center space-x-2 backdrop-blur-sm border border-purple-500/30">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                        d="M7 16a1 1 0 01-1-1v-4a1 1 0 011-1h6a1 1 0 011 1v4a1 1 0 01-1 1H7zM4 14a1 1 0 01-1-1v-2a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4zM10 3a1 1 0 011 1v1a1 1 0 01-2 0V4a1 1 0 011-1zM16 3a1 1 0 011 1v1a1 1 0 01-2 0V4a1 1 0 011-1zM4 3a1 1 0 011 1v1a1 1 0 01-2 0V4a1 1 0 011-1z">
+                    </path>
+                </svg>
+                <span>Exportar MIDI</span>
+            </button>
+        </div>
+
+        <div class="space-y-8">
+
+            <div class="glass-panel p-6 rounded-xl shadow-2xl">
+                <h2 class="text-xl font-semibold mb-4 text-cyan-300 drop-shadow-sm text-center">1. Seleccionar Planeta
+                </h2>
+                <div id="planetSelection" class="grid grid-cols-4 md:grid-cols-8 gap-3"></div>
+            </div>
+
+            <div class="glass-panel p-6 rounded-xl shadow-2xl">
+                <h2 class="text-xl font-semibold mb-4 text-cyan-300 drop-shadow-sm text-center">2. Controles Musicales
+                    Interactivos</h2>
+                <div id="musicalControls" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="control-group">
+                        <label for="sliderVolumen"
+                            class="block mb-1 font-medium flex justify-between text-gray-200">Volumen (Masa): <span
+                                id="valVolumen" class="font-normal text-blue-400">-12 dB</span></label>
+                        <input type="range" id="sliderVolumen" min="-30" max="0" value="-12" step="1"
+                            class="w-full h-2 bg-gray-700/50 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                    <div class="control-group">
+                        <label for="sliderFrecuencia"
+                            class="block mb-1 font-medium flex justify-between text-gray-200">Tonalidad Base (Radio):
+                            <span id="valFrecuencia" class="font-normal text-blue-400">100 Hz</span></label>
+                        <input type="range" id="sliderFrecuencia" min="50" max="600" value="100" step="1"
+                            class="w-full h-2 bg-gray-700/50 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                    <div class="control-group">
+                        <label for="sliderDuracion"
+                            class="block mb-1 font-medium flex justify-between text-gray-200">Tempo/Ritmo (Rotación):
+                            <span id="valDuracion" class="font-normal text-blue-400">0.25 seg</span></label>
+                        <input type="range" id="sliderDuracion" min="0.05" max="4.0" value="0.25" step="0.01"
+                            class="w-full h-2 bg-gray-700/50 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                    <div class="control-group">
+                        <label for="sliderFiltroFrec"
+                            class="block mb-1 font-medium flex justify-between text-gray-200">Timbre/Brillo
+                            (Temperatura): <span id="valFiltroFrec" class="font-normal text-blue-400">1000
+                                Hz</span></label>
+                        <input type="range" id="sliderFiltroFrec" min="200" max="5000" value="1000" step="50"
+                            class="w-full h-2 bg-gray-700/50 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                    <div class="control-group">
+                        <label for="sliderReverbDecaimiento"
+                            class="block mb-1 font-medium flex justify-between text-gray-200">Ambiente (Distancia al
+                            Sol): <span id="valReverbDecaimiento" class="font-normal text-blue-400">1.5
+                                seg</span></label>
+                        <input type="range" id="sliderReverbDecaimiento" min="0.1" max="5.0" value="1.5" step="0.1"
+                            class="w-full h-2 bg-gray-700/50 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                    <div class="control-group">
+                        <label for="sliderChorusDepth"
+                            class="block mb-1 font-medium flex justify-between text-gray-200">Profundidad Modulación
+                            (Lunas): <span id="valChorusDepth" class="font-normal text-blue-400">0.5</span></label>
+                        <input type="range" id="sliderChorusDepth" min="0.0" max="1.0" value="0.5" step="0.01"
+                            class="w-full h-2 bg-gray-700/50 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                    <div class="control-group">
+                        <label for="sliderVibratoAmount"
+                            class="block mb-1 font-medium flex justify-between text-gray-200">Oscilación (Inclinación
+                            Axial): <span id="valVibratoAmount" class="font-normal text-blue-400">0.5</span></label>
+                        <input type="range" id="sliderVibratoAmount" min="0.0" max="1.0" value="0.5" step="0.01"
+                            class="w-full h-2 bg-gray-700/50 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                    <div class="control-group">
+                        <label for="sliderAutoFilterDepth"
+                            class="block mb-1 font-medium flex justify-between text-gray-200">Filtro Dinámico (Act.
+                            Meteorológica): <span id="valAutoFilterDepth" class="font-normal text-blue-400">500
+                                Hz</span></label>
+                        <input type="range" id="sliderAutoFilterDepth" min="0" max="1000" value="500" step="10"
+                            class="w-full h-2 bg-gray-700/50 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-panel p-6 rounded-xl shadow-2xl">
+                <h2 class="text-xl font-semibold mb-4 text-cyan-300 drop-shadow-sm text-center">3. Visualización
+                    Interactiva: Eyes on the Solar System (NASA)</h2>
+                <div class="eyes-container shadow-2xl ring-1 ring-white/10">
+                    <iframe id="nasaEyesFrame" src="" title="NASA Eyes on the Solar System"
+                        allow="autoplay; fullscreen; vr" allowfullscreen></iframe>
+                </div>
+                <div class="flex justify-between items-center mt-2 px-2">
+                    <p class="text-xs text-gray-400">Interactúa con el ratón: Clic+Arrastrar para rotar, Rueda para
+                        Zoom.</p>
+                    <a id="fallbackLink" href="#" target="_blank"
+                        class="text-xs text-blue-400 hover:underline hidden">Abrir en pestaña nueva</a>
+                </div>
+            </div>
+
+            <div class="glass-panel p-6 rounded-xl shadow-2xl">
+                <h2 class="text-xl font-semibold mb-4 text-cyan-300 drop-shadow-sm text-center">4. Análisis Sonoro
+                    Asistido por IA <span class="text-sm text-gray-400 italic">(Explicación para ESO)</span></h2>
+                <div id="aiAnalysis"
+                    class="text-gray-300 min-h-[100px] p-4 bg-gray-800/50 rounded-lg border border-gray-600/50">
+                    <p class="italic text-gray-400 text-center">Haz clic en "Generar Análisis" para que la IA explique
+                        por qué el planeta suena así.</p>
+                </div>
+                <div class="flex justify-center mt-4">
+                    <button id="generateAnalysisBtn"
+                        class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition duration-200 disabled:opacity-50 flex items-center space-x-2 shadow-lg">
+                        <span id="analysisText">Generar Análisis</span>
+                        <div id="analysisLoading" class="loading-ring hidden"></div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="glass-panel p-6 rounded-xl shadow-2xl">
+                <h2 class="text-xl font-semibold mb-4 text-cyan-300 drop-shadow-sm text-center">5. Análisis Dinámico de
+                    <span id="currentPlanetName"></span></h2>
+                <div class="overflow-x-auto">
+                    <table id="physicalParams"
+                        class="w-full text-sm text-left text-gray-300 rounded-lg overflow-hidden border border-gray-700">
+                        <thead class="text-xs uppercase bg-gray-800/90 text-gray-300">
+                            <tr>
+                                <th scope="col" class="px-4 py-3 w-1/4">Físico</th>
+                                <th scope="col" class="px-4 py-3 w-1/4">Musical (Valor)</th>
+                                <th scope="col" class="px-4 py-3 w-2/4">Justificación (Regla)</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script type="module">
-        // YOUR V2 JAVASCRIPT GOES HERE
+        // Todas las melodías están ahora estandarizadas en DO (C4/C3)
+        // La frecuencia base del planeta transpondrá esta melodía a la tonalidad correcta.
+        const initialPlanetasData = [
+            {
+                nombre: "Mercurio", classification: "Rocoso", masa: "0.055 × Tierra", radio: "2.440 km", distancia: "58 M km", rotacion: "58.6 días", excentricidad: "0.205 (Alta)", temp_media: "167 °C", lunas: "0", inclinacion_axial: "0.01° (Baja)", actividad_meteorologica: "Baja/Nula", color: "bg-gray-400",
+                synthType: { v0: 'triangle', v1: 'pulse' }, nasaId: "mercury", tonality: "Mayor",
+                // Freq: 523Hz (C5) -> Muy Agudo
+                audio: { volumen: -10, frecuencia: 523.25, duracion: 1.5, filtro_frec: 1500, reverb_decaimiento: 0.5, chorus_depth: 0.0, vibrato_amount: 0.0, autofilter_depth: 50 },
+                melody: ['C4', 'E4', 'G4', 'B4', 'C5', 'G4', 'E4', 'C4'], isRetrograde: false,
+            },
+            {
+                nombre: "Venus", classification: "Rocoso", masa: "0.815 × Tierra", radio: "6.052 km", distancia: "108 M km", rotacion: "243 días", excentricidad: "0.007 (Baja)", temp_media: "464 °C (Más caliente)", lunas: "0", inclinacion_axial: "2.64° (Baja)", actividad_meteorologica: "Alta (Atmósfera densa)", color: "bg-yellow-600",
+                synthType: { v0: 'square', v1: 'sine' }, nasaId: "venus", tonality: "Aumentado",
+                // Freq: 293Hz (D4) -> Medio-Agudo (Tonalidad Re Aumentado)
+                audio: { volumen: -12, frecuencia: 293.66, duracion: 3.0, filtro_frec: 5000, reverb_decaimiento: 0.2, chorus_depth: 0.0, vibrato_amount: 0.05, autofilter_depth: 800 },
+                melody: ['C4', 'E4', 'G#4', 'C5', 'G#4', 'E4', 'C4', 'G#3'], isRetrograde: true,
+            },
+            {
+                nombre: "Tierra", classification: "Rocoso", masa: "1 × Tierra", radio: "6.371 km", distancia: "150 M km", rotacion: "1 día", excentricidad: "0.017 (Baja)", temp_media: "15 °C", lunas: "1", inclinacion_axial: "23.4° (Media)", actividad_meteorologica: "Media (Nubes, tormentas)", color: "bg-blue-500",
+                synthType: { v0: 'sine', v1: 'sawtooth' }, nasaId: "earth", tonality: "Mayor",
+                // Freq: 261Hz (C4) -> Do Mayor (Referencia)
+                audio: { volumen: -8, frecuencia: 261.63, duracion: 0.5, filtro_frec: 2000, reverb_decaimiento: 1.0, chorus_depth: 0.2, vibrato_amount: 0.5, autofilter_depth: 350 },
+                melody: ['C4', 'G4', 'E4', 'A4', 'G4', 'F4', 'E4', 'D4'], isRetrograde: false,
+            },
+            {
+                nombre: "Marte", classification: "Rocoso", masa: "0.107 × Tierra", radio: "3.390 km", distancia: "228 M km", rotacion: "1.03 días", excentricidad: "0.093 (Media)", temp_media: "-63 °C", lunas: "2", inclinacion_axial: "25.2° (Media)", actividad_meteorologica: "Baja (Polvo, vientos)", color: "bg-red-600",
+                synthType: { v0: 'sawtooth', v1: 'triangle' }, nasaId: "mars", tonality: "Menor",
+                // Freq: 392Hz (G4) -> Sol Menor (Más agudo que la Tierra por ser más pequeño)
+                audio: { volumen: -18, frecuencia: 392.00, duracion: 0.52, filtro_frec: 1000, reverb_decaimiento: 1.5, chorus_depth: 0.4, vibrato_amount: 0.6, autofilter_depth: 150 },
+                melody: ['C4', 'Eb4', 'G4', 'C5', 'G4', 'Eb4', 'D4', 'C4'], isRetrograde: false,
+            },
+            {
+                nombre: "Júpiter", classification: "Gaseoso", masa: "318 × Tierra", radio: "69.911 km", distancia: "778 M km", rotacion: "0.41 días", excentricidad: "0.048 (Media)", temp_media: "-145 °C", lunas: "95", inclinacion_axial: "3.13° (Baja)", actividad_meteorologica: "Muy Alta (Gran Mancha Roja)", color: "bg-orange-500",
+                synthType: { v0: 'fat-sawtooth', v1: 'square' }, nasaId: "jupiter", tonality: "Mayor",
+                // Freq: 65Hz (C2) -> Do Grave (Bajo Profundo)
+                audio: { volumen: -5, frecuencia: 65.41, duracion: 0.25, filtro_frec: 500, reverb_decaimiento: 2.5, chorus_depth: 0.8, vibrato_amount: 0.1, autofilter_depth: 950 },
+                melody: ['C3', 'G2', 'C3', 'E3', 'G3', 'C4', 'G3', 'E3'], isRetrograde: false,
+            },
+            {
+                nombre: "Saturno", classification: "Gaseoso", masa: "95 × Tierra", radio: "58.232 km", distancia: "1.427 M km", rotacion: "0.44 días", excentricidad: "0.056 (Media)", temp_media: "-178 °C", lunas: "146", inclinacion_axial: "26.7° (Media)", actividad_meteorologica: "Media (Anillos, vientos)", color: "bg-yellow-300",
+                synthType: { v0: 'pulse', v1: 'sawtooth' }, nasaId: "saturn", tonality: "Menor",
+                // Freq: 110Hz (A2) -> La Menor (Grave pero menos que Júpiter)
+                audio: { volumen: -7, frecuencia: 110.00, duracion: 0.3, filtro_frec: 400, reverb_decaimiento: 3.0, chorus_depth: 1.0, vibrato_amount: 0.7, autofilter_depth: 500 },
+                melody: ['C3', 'Eb3', 'G3', 'C4', 'G3', 'Eb3', 'D3', 'C3'], isRetrograde: false,
+            },
+            {
+                nombre: "Urano", classification: "Gaseoso", masa: "14.5 × Tierra", radio: "25.362 km", distancia: "2.871 M km", rotacion: "0.72 días (Retrógrada)", excentricidad: "0.047 (Casi Regular)", temp_media: "-195 °C", lunas: "27", inclinacion_axial: "97.7° (Muy Alta)", actividad_meteorologica: "Baja/Mínima", color: "bg-cyan-400",
+                synthType: { v0: 'triangle', v1: 'fat-sine' }, nasaId: "uranus", tonality: "Dórico",
+                // Freq: 146Hz (D3) -> Re Dórico (Medio-Grave)
+                audio: { volumen: -10, frecuencia: 146.83, duracion: 0.4, filtro_frec: 300, reverb_decaimiento: 3.5, chorus_depth: 0.6, vibrato_amount: 1.0, autofilter_depth: 100 },
+                melody: ['C3', 'D3', 'Eb3', 'F3', 'G3', 'A3', 'Bb3', 'C4'], isRetrograde: true,
+            },
+            {
+                nombre: "Neptuno", classification: "Gaseoso", masa: "17.1 × Tierra", radio: "24.622 km", distancia: "4.498 M km", rotacion: "0.67 días", excentricidad: "0.011 (Baja)", temp_media: "-201 °C", lunas: "16", inclinacion_axial: "28.3° (Media)", actividad_meteorologica: "Media/Alta (Vientos rápidos)", color: "bg-blue-800",
+                synthType: { v0: 'fmsine', v1: 'amsine' }, nasaId: "neptune", tonality: "Locrio",
+                // Freq: 123Hz (B2) -> Si Locrio (Oscuro)
+                audio: { volumen: -9, frecuencia: 123.47, duracion: 0.37, filtro_frec: 200, reverb_decaimiento: 4.0, chorus_depth: 0.5, vibrato_amount: 0.7, autofilter_depth: 650 },
+                melody: ['C3', 'Db3', 'Eb3', 'F3', 'Gb3', 'Ab3', 'Bb3', 'C4'], isRetrograde: false,
+            },
+        ];
+
+        let planetasData = JSON.parse(JSON.stringify(initialPlanetasData));
+
+        const mappingRules = [
+            { phys_key: "classification", audio_key: "synthType", musical: "Timbre/Forma de Onda", unit: "", rule: "Planetas Gaseosos usan ondas más armónicas. Rocosos usan ondas más puras." },
+            { phys_key: "masa", audio_key: "volumen", musical: "Volumen", unit: " dB", rule: "Más masa = Más presencia sonora (mezzoforte)." },
+            { phys_key: "radio", audio_key: "frecuencia", musical: "Tonalidad Base", unit: " Hz", rule: "Inverso: Más grande = Frecuencia más grave (Cuantizada)." },
+            { phys_key: "distancia", audio_key: "reverb_decaimiento", musical: "Decaimiento Reverb", unit: " seg", rule: "Más lejos = Mayor eco/reverb." },
+            { phys_key: "rotacion", audio_key: "duracion", musical: "Tempo/Ritmo", unit: " BPM", rule: "Más rápido = Mayor BPM. Rotación retrógrada invierte melodía." },
+            { phys_key: "excentricidad", audio_key: "excentricidad_melodia", musical: "Melodía/Intervalos", unit: "", rule: "Más elíptica = Mayor varianza/complejidad melódica." },
+            { phys_key: "temp_media", audio_key: "filtro_frec", musical: "Filtro/Timbre", unit: " Hz", rule: "Más frío = Timbre más oscuro/helado (lowpass)." },
+            { phys_key: "lunas", audio_key: "chorus_depth", musical: "Profundidad Modulación", unit: "", rule: "Más satélites = Sonido más 'lleno'/complejo." },
+            { phys_key: "inclinacion_axial", audio_key: "vibrato_amount", musical: "Oscilación/Detune", unit: "", rule: "Mayor inclinación = Mayor 'bamboleo' (Oscilación)." },
+            { phys_key: "actividad_meteorologica", audio_key: "autofilter_depth", musical: "Filtro Dinámico", unit: " (Escala)", rule: "Actividad dinámica = Modulación profunda del timbre o voz." },
+        ];
+
+        const apiKey = "";
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+        let synth = null, filter = null, reverb = null, chorus = null, autoFilter = null, sequencer = null;
+        let isPlaying = false, selectedPlanet = planetasData[0], audioInitialized = false;
+
+        const playStopBtn = document.getElementById('playStopBtn'), playStopText = document.getElementById('playStopText');
+        const playIcon = document.getElementById('playIcon'), stopIcon = document.getElementById('stopIcon');
+        const exportLoopBtn = document.getElementById('exportLoopBtn');
+        const planetSelection = document.getElementById('planetSelection'), physicalParamsTable = document.getElementById('physicalParams').getElementsByTagName('tbody')[0];
+        const generateAnalysisBtn = document.getElementById('generateAnalysisBtn'), aiAnalysisDiv = document.getElementById('aiAnalysis');
+        const analysisLoading = document.getElementById('analysisLoading'), exportMidiBtn = document.getElementById('exportMidiBtn');
+        const currentPlanetNameSpan = document.getElementById('currentPlanetName'), nasaEyesFrame = document.getElementById('nasaEyesFrame');
+        const fallbackLink = document.getElementById('fallbackLink');
+
+        const sliders = [
+            { id: 'sliderVolumen', param: 'volumen', unit: ' dB', display: 'valVolumen', updateTone: (value) => Tone.Master.volume.value = value },
+            { id: 'sliderFrecuencia', param: 'frecuencia', unit: ' Hz', display: 'valFrecuencia', updateTone: (value) => { } },
+            { id: 'sliderDuracion', param: 'duracion', unit: ' seg', display: 'valDuracion', updateTone: (value) => Tone.Transport.bpm.value = 60 / value },
+            { id: 'sliderFiltroFrec', param: 'filtro_frec', unit: ' Hz', display: 'valFiltroFrec', updateTone: (value) => filter.frequency.value = value },
+            { id: 'sliderReverbDecaimiento', param: 'reverb_decaimiento', unit: ' seg', display: 'valReverbDecaimiento', updateTone: (value) => reverb.decay = value },
+            { id: 'sliderChorusDepth', param: 'chorus_depth', unit: '', display: 'valChorusDepth', updateTone: (value) => chorus.depth.value = value },
+            { id: 'sliderVibratoAmount', param: 'vibrato_amount', unit: '', display: 'valVibratoAmount', updateTone: (value) => synth.vibratoAmount.value = value },
+            { id: 'sliderAutoFilterDepth', param: 'autofilter_depth', unit: ' Hz', display: 'valAutoFilterDepth', updateTone: (value) => autoFilter.depth.value = value / 1000 },
+        ];
+
+        function getInitialPlanetData(nombre) { return initialPlanetasData.find(p => p.nombre === nombre); }
+        function createPlanetButtons() {
+            planetSelection.innerHTML = '';
+            planetasData.forEach(planet => {
+                const button = document.createElement('button');
+                button.id = `btn-${planet.nombre}`;
+                button.className = `planet-btn ${planet.color} text-white font-semibold py-2 px-4 rounded-full text-xs shadow-md hover:scale-105`;
+                button.textContent = planet.nombre;
+                button.addEventListener('click', () => selectPlanet(planet));
+                planetSelection.appendChild(button);
+            });
+        }
+
+        function formatTonality(hz, planet) {
+            const note = Tone.Frequency(hz).toNote();
+            const noteName = note.replace(/[0-9]/g, '');
+            let cipher = noteName;
+            const tonality = planet.tonality || "Mayor";
+            if (tonality === "Menor") cipher += "m";
+            else if (tonality === "Dórico") cipher += "m (Dor)";
+            else if (tonality === "Locrio") cipher += "dim";
+            else if (tonality === "Aumentado") cipher += "aug";
+            return `${note} [${cipher}]`;
+        }
+
+        function buildAudioChain(context, planet) {
+            const rev = new Tone.Reverb({ decay: planet.audio.reverb_decaimiento, wet: 0.5, context: context }).toDestination();
+            const cho = new Tone.Chorus({ frequency: 1.5, delayTime: 3.5, depth: planet.audio.chorus_depth, type: 'sine', wet: 0.6, context: context }).connect(rev);
+            const af = new Tone.AutoFilter({ frequency: 2, depth: planet.audio.autofilter_depth / 1000, octaves: 2, type: 'sine', context: context }).connect(cho).start();
+            const filt = new Tone.Filter({ frequency: planet.audio.filtro_frec, type: 'lowpass', context: context }).connect(af);
+            const syn = new Tone.DuoSynth({
+                vibratoRate: 5, harmonicity: 1.5,
+                voice0: { volume: -10, oscillator: { type: planet.synthType.v0 }, envelope: { attack: 0.01, decay: 0.5, sustain: 0.1, release: 1 } },
+                voice1: { volume: -10, oscillator: { type: planet.synthType.v1 }, envelope: { attack: 0.01, decay: 0.1, sustain: 0.5, release: 1 } },
+                context: context
+            }).connect(filt);
+            syn.vibratoAmount.value = planet.audio.vibrato_amount;
+            return { syn, rev };
+        }
+
+        function initializeTone() {
+            if (audioInitialized) return;
+            reverb = new Tone.Reverb({ decay: selectedPlanet.audio.reverb_decaimiento, wet: 0.5 }).toDestination();
+            chorus = new Tone.Chorus({ frequency: 1.5, delayTime: 3.5, depth: selectedPlanet.audio.chorus_depth, type: 'sine', wet: 0.6 }).connect(reverb);
+            autoFilter = new Tone.AutoFilter({ frequency: 2, depth: selectedPlanet.audio.autofilter_depth / 1000, octaves: 2, type: 'sine' }).connect(chorus).start();
+            filter = new Tone.Filter(selectedPlanet.audio.filtro_frec, 'lowpass').connect(autoFilter);
+            synth = new Tone.DuoSynth({ vibratoRate: 5, harmonicity: 1.5, voice0: { volume: -10, oscillator: { type: selectedPlanet.synthType.v0 }, envelope: { attack: 0.01, decay: 0.5, sustain: 0.1, release: 1 } }, voice1: { volume: -10, oscillator: { type: selectedPlanet.synthType.v1 }, envelope: { attack: 0.01, decay: 0.1, sustain: 0.5, release: 1 } } }).connect(filter);
+            synth.vibratoAmount.value = selectedPlanet.audio.vibrato_amount;
+
+            sequencer = new Tone.Sequence((time, note) => {
+                let noteDuration = document.getElementById('sliderDuracion').value;
+                let baseFreq = document.getElementById('sliderFrecuencia').value;
+
+                // QUANTIZED TRANSPOSITION (Relative to C4 261.63Hz)
+                // C4 is the root of all melodies now
+                const semitoneShift = Math.round(12 * Math.log2(baseFreq / 261.63));
+                const finalNote = Tone.Frequency(note).transpose(semitoneShift);
+
+                synth.triggerAttackRelease(finalNote, noteDuration, time);
+            }, selectedPlanet.melody, "4n").start(0);
+
+            Tone.Transport.stop();
+            audioInitialized = true;
+        }
+
+        function updateToneParams(planet) {
+            if (!audioInitialized) return;
+            let currentMelody = [...planet.melody];
+            if (planet.isRetrograde) currentMelody.reverse();
+            sequencer.events = currentMelody;
+            Tone.Transport.bpm.value = 60 / planet.audio.duracion;
+            sliders.forEach(s => { if (s.updateTone) s.updateTone(planet.audio[s.param]); });
+            if (synth.voice0.oscillator.type !== planet.synthType.v0) synth.voice0.set({ oscillator: { type: planet.synthType.v0 } });
+            if (synth.voice1.oscillator.type !== planet.synthType.v1) synth.voice1.set({ oscillator: { type: planet.synthType.v1 } });
+            if (filter) filter.frequency.value = planet.audio.filtro_frec;
+        }
+
+        function updateSliderUI(planet) {
+            sliders.forEach(s => {
+                const input = document.getElementById(s.id);
+                const display = document.getElementById(s.display);
+                const value = planet.audio[s.param];
+                input.value = value;
+                const unit = s.unit;
+
+                if (s.param === 'duracion') {
+                    const bpm = Math.round(60 / value);
+                    display.textContent = `${value.toFixed(2)} ${unit} (${bpm} BPM)`;
+                } else if (s.param === 'frecuencia') {
+                    display.textContent = `${Math.round(value)} ${unit} - ${formatTonality(value, planet)}`;
+                } else if (s.param.includes('autofilter')) {
+                    display.textContent = `${Math.round(value)} ${unit}`;
+                } else {
+                    display.textContent = `${value.toFixed(s.param === 'volumen' ? 0 : 2)}${unit}`;
+                }
+            });
+        }
+
+        function selectPlanet(planetClicked) {
+            const initialData = getInitialPlanetData(planetClicked.nombre);
+            selectedPlanet = JSON.parse(JSON.stringify(initialData));
+            if (initialData.nasaId) {
+                const nasaUrl = `https://eyes.nasa.gov/apps/solar-system/#/${initialData.nasaId}`;
+                nasaEyesFrame.src = nasaUrl;
+                fallbackLink.href = nasaUrl;
+                fallbackLink.classList.remove('hidden');
+            } else {
+                nasaEyesFrame.src = "";
+                fallbackLink.classList.add('hidden');
+            }
+            updateSliderUI(selectedPlanet);
+            if (audioInitialized) updateToneParams(selectedPlanet);
+            updateUI(selectedPlanet);
+            aiAnalysisDiv.innerHTML = `<p class="italic text-gray-400">Selecciona un planeta y haz clic en "Generar Análisis" para obtener una interpretación musical de sus características físicas, explicada de forma sencilla para estudiantes de ESO.</p>`;
+            generateAnalysisBtn.disabled = false;
+            document.querySelectorAll('.planet-btn').forEach(btn => btn.classList.remove('active'));
+            setTimeout(() => { const activeBtn = document.getElementById(`btn-${selectedPlanet.nombre}`); if (activeBtn) activeBtn.classList.add('active'); }, 0);
+            if (isPlaying) { Tone.Transport.stop(); Tone.Transport.start(); }
+        }
+
+        function updateUI(planet) {
+            currentPlanetNameSpan.textContent = planet.nombre;
+            physicalParamsTable.innerHTML = '';
+
+            try {
+                mappingRules.forEach((rule, index) => {
+                    const row = physicalParamsTable.insertRow();
+                    row.className = 'dynamic-table-row border-b border-gray-700';
+                    let physicalValue = planet[rule.phys_key] || 'N/A';
+                    let musicalValue = planet.audio[rule.audio_key] || planet[rule.audio_key];
+                    let musicalDisplay;
+                    if (rule.audio_key === 'duracion') {
+                        musicalValue = 60 / (planet.audio.duracion || 1);
+                        musicalDisplay = `${musicalValue.toFixed(0)}${rule.unit}`;
+                    } else if (rule.audio_key === 'excentricidad_melodia') {
+                        physicalValue = planet.excentricidad;
+                        musicalDisplay = planet.melody.join(', ') + (planet.isRetrograde ? ' (INVERTIDA)' : '');
+                    } else if (rule.audio_key === 'synthType') {
+                        physicalValue = planet.classification;
+                        musicalDisplay = `${planet.synthType.v0} / ${planet.synthType.v1}`;
+                    } else if (rule.audio_key === 'autofilter_depth' || rule.audio_key === 'volumen') {
+                        musicalDisplay = `${parseFloat(planet.audio[rule.audio_key]).toFixed(0)}${rule.unit}`;
+                    } else if (rule.audio_key === 'frecuencia') {
+                        musicalDisplay = `${parseFloat(planet.audio[rule.audio_key]).toFixed(0)}${rule.unit} (${formatTonality(planet.audio.frecuencia, planet)})`;
+                    } else {
+                        musicalDisplay = `${parseFloat(planet.audio[rule.audio_key]).toFixed(2)}${rule.unit}`;
+                    }
+                    let cell1 = row.insertCell(); cell1.className = 'px-3 py-2 font-medium text-gray-200'; cell1.innerHTML = `${rule.phys_key.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}<br><span class="text-xs text-blue-400 italic">${physicalValue}</span>`;
+                    let cell2 = row.insertCell(); cell2.className = 'px-3 py-2'; cell2.innerHTML = `${rule.musical}<br><span class="text-sm font-bold text-cyan-300">${musicalDisplay}</span>`;
+                    let cell3 = row.insertCell(); cell3.className = 'px-3 py-2 text-xs text-gray-400'; cell3.textContent = rule.rule;
+                });
+            } catch (e) {
+                console.error("Error updating UI table:", e);
+            }
+        }
+
+        async function togglePlayback() {
+            if (!audioInitialized) { initializeTone(); updateToneParams(selectedPlanet); if (!nasaEyesFrame.src) selectPlanet(selectedPlanet); }
+            if (Tone.context.state !== 'running') await Tone.start();
+            if (isPlaying) {
+                Tone.Transport.stop(); playStopText.textContent = 'Reproducir'; playIcon.classList.remove('hidden'); stopIcon.classList.add('hidden'); playStopBtn.classList.remove('bg-red-600', 'hover:bg-red-700'); playStopBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+            } else {
+                Tone.Transport.start(); playStopText.textContent = 'Detener'; playIcon.classList.add('hidden'); stopIcon.classList.remove('hidden'); playStopBtn.classList.remove('bg-green-600', 'hover:bg-green-700'); playStopBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+            }
+            isPlaying = !isPlaying;
+        }
+
+        // --- OFFLINE RENDERING & WAV EXPORT ---
+        function bufferToWave(abuffer, len) {
+            let numOfChan = abuffer.numberOfChannels, length = len * numOfChan * 2 + 44, buffer = new ArrayBuffer(length), view = new DataView(buffer), channels = [], i, sample, offset = 0, pos = 0;
+            function setUint16(data) { view.setUint16(pos, data, true); pos += 2; }
+            function setUint32(data) { view.setUint32(pos, data, true); pos += 4; }
+            setUint32(0x46464952); setUint32(length - 8); setUint32(0x45564157); setUint32(0x20746d66); setUint32(16); setUint16(1); setUint16(numOfChan); setUint32(abuffer.sampleRate); setUint32(abuffer.sampleRate * 2 * numOfChan); setUint16(numOfChan * 2); setUint16(16); setUint32(0x61746164); setUint32(length - pos - 4);
+            for (i = 0; i < abuffer.numberOfChannels; i++) channels.push(abuffer.getChannelData(i));
+            while (pos < length) {
+                for (i = 0; i < numOfChan; i++) { sample = Math.max(-1, Math.min(1, channels[i][offset])); sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0; view.setInt16(pos, sample, true); pos += 2; }
+                offset++;
+            }
+            return new Blob([buffer], { type: "audio/wav" });
+        }
+
+        async function exportLoopWav() {
+            const planet = selectedPlanet;
+            const durationOfNote = planet.audio.duracion;
+            const notes = planet.melody.length;
+            const loopDuration = durationOfNote * notes;
+            const totalDuration = loopDuration * 2; // 2 loops
+
+            exportLoopBtn.textContent = "Generando...";
+            exportLoopBtn.disabled = true;
+
+            const buffer = await Tone.Offline(({ transport }) => {
+                const offCtx = transport.context;
+                // Rebuild chain for offline (using same params)
+                const chain = buildAudioChain(offCtx, planet);
+                const offSynth = chain.syn;
+                const offReverb = chain.rev;
+
+                let currentMelody = [...planet.melody];
+                if (planet.isRetrograde) currentMelody.reverse();
+
+                let noteIndex = 0;
+                // Schedule exact quantization for offline
+                const currentFreq = planet.audio.frecuencia;
+
+                for (let i = 0; i < notes * 2; i++) {
+                    const note = currentMelody[noteIndex % notes];
+                    // Same Quantized Math as Realtime (Relative to C4)
+                    const semitoneShift = Math.round(12 * Math.log2(currentFreq / 261.63));
+                    const finalNote = Tone.Frequency(note).transpose(semitoneShift);
+
+                    offSynth.triggerAttackRelease(finalNote, durationOfNote, i * durationOfNote);
+                    noteIndex++;
+                }
+
+                transport.start();
+                return offReverb.generate();
+
+            }, totalDuration);
+
+            const wavBlob = bufferToWave(buffer, totalDuration * buffer.sampleRate);
+            const url = URL.createObjectURL(wavBlob);
+            const anchor = document.createElement("a");
+            anchor.download = `Loop-${planet.nombre}-${Math.round(60 / durationOfNote)}BPM.wav`;
+            anchor.href = url;
+            anchor.click();
+
+            exportLoopBtn.textContent = "Exportar Bucle (WAV)";
+            exportLoopBtn.disabled = false;
+        }
+
+        exportLoopBtn.addEventListener('click', exportLoopWav);
+
+
+        function createMidiFile(notes, bpm, planetName) {
+            const ticksPerQuarterNote = 480; const microSecondsPerBeat = Math.round(60000000 / bpm);
+            let header = [0x4d, 0x54, 0x68, 0x64, 0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00, 0x01, (ticksPerQuarterNote >> 8) & 0xFF, ticksPerQuarterNote & 0xFF];
+            const channel = 0x00; const velocity = 100;
+            let trackEvents = [];
+            trackEvents.push(0x00, 0xFF, 0x51, 0x03, (microSecondsPerBeat >> 16) & 0xFF, (microSecondsPerBeat >> 8) & 0xFF, microSecondsPerBeat & 0xFF);
+
+            // CC Messages
+            const vol = selectedPlanet.audio.volumen; const ccVol = Math.min(127, Math.max(0, Math.round((vol + 30) * (127 / 30)))); trackEvents.push(0x00, 0xB0 + channel, 0x07, ccVol);
+            const freq = selectedPlanet.audio.filtro_frec; const ccFreq = Math.min(127, Math.max(0, Math.round((freq / 5000) * 127))); trackEvents.push(0x00, 0xB0 + channel, 0x4A, ccFreq);
+            const rev = selectedPlanet.audio.reverb_decaimiento; const ccRev = Math.min(127, Math.max(0, Math.round((rev / 5.0) * 127))); trackEvents.push(0x00, 0xB0 + channel, 0x5B, ccRev);
+            const cho = selectedPlanet.audio.chorus_depth; const ccCho = Math.round(cho * 127); trackEvents.push(0x00, 0xB0 + channel, 0x5D, ccCho);
+            const vib = selectedPlanet.audio.vibrato_amount; const ccVib = Math.round(vib * 127); trackEvents.push(0x00, 0xB0 + channel, 0x01, ccVib);
+
+            const VLQ_240 = [0x81, 0x70];
+            for (let i = 0; i < notes.length; i++) {
+                const noteName = notes[i]; const midiNumber = Tone.Frequency(noteName).toMidi();
+                trackEvents.push(0x00, 0x90 + channel, midiNumber, velocity);
+                trackEvents.push(...VLQ_240, 0x80 + channel, midiNumber, 0x00);
+            }
+            trackEvents.push(0x00, 0xFF, 0x2F, 0x00);
+
+            const flatTrackEvents = trackEvents.flat();
+            const trackLength = flatTrackEvents.length;
+            let trackHeader = [0x4d, 0x54, 0x72, 0x6b, (trackLength >> 24) & 0xFF, (trackLength >> 16) & 0xFF, (trackLength >> 8) & 0xFF, trackLength & 0xFF];
+            let fullMidi = [...header, ...trackHeader, ...flatTrackEvents];
+            const midiBlob = new Blob([new Uint8Array(fullMidi)], { type: 'audio/midi' });
+            const url = URL.createObjectURL(midiBlob);
+            const link = document.createElement('a'); link.href = url; link.download = `Sinfonia-${planetName}.mid`;
+            document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url);
+        }
+
+        function exportMidi() {
+            if (!selectedPlanet.melody || selectedPlanet.melody.length === 0) return;
+            let notes = [...selectedPlanet.melody];
+            if (selectedPlanet.isRetrograde) notes.reverse();
+            const currentDuration = selectedPlanet.audio.duracion; const bpm = 60 / currentDuration;
+            createMidiFile(notes, bpm, selectedPlanet.nombre);
+        }
+
+        async function generateAnalysis() {
+            aiAnalysisDiv.innerHTML = ''; analysisLoading.classList.remove('hidden'); generateAnalysisBtn.disabled = true;
+            const planet = selectedPlanet;
+            const prompt = `Explica para ESO cómo suena ${planet.nombre}: Tipo: ${planet.classification}, Tono: ${planet.audio.frecuencia}Hz, Eco: ${planet.audio.reverb_decaimiento}s, Ritmo: ${planet.audio.duracion}s, Temp: ${planet.audio.filtro_frec}Hz, Clima: ${planet.audio.autofilter_depth}`;
+            const payload = { contents: [{ parts: [{ text: prompt }] }], tools: [{ "google_search": {} }], systemInstruction: { parts: [{ text: "Profesor de música y astronomía para adolescentes. Responde en español, conciso (max 100 palabras)." }] } };
+            try {
+                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const result = await response.json();
+                const text = result.candidates?.[0].content.parts[0].text;
+                aiAnalysisDiv.innerHTML = `<p>${text}</p>`;
+            } catch (error) { aiAnalysisDiv.innerHTML = `<p class="text-red-400">Error al generar análisis.</p>`; }
+            analysisLoading.classList.add('hidden'); generateAnalysisBtn.disabled = false;
+        }
+
+        window.onload = () => {
+            createPlanetButtons(); selectPlanet(planetasData[0]);
+            sliders.forEach(s => {
+                const input = document.getElementById(s.id);
+                const display = document.getElementById(s.display);
+                input.addEventListener('input', (e) => {
+                    const value = parseFloat(e.target.value);
+                    selectedPlanet.audio[s.param] = value;
+                    const unit = s.unit;
+                    if (s.param === 'duracion') {
+                        const bpm = Math.round(60 / value); display.textContent = `${value.toFixed(2)} ${unit} (${bpm} BPM)`;
+                    } else if (s.param === 'frecuencia') {
+                        // CÁLCULO DE NOTA CUANTIZADA
+                        const semitoneShift = Math.round(12 * Math.log2(value / 261.63));
+                        const note = Tone.Frequency("C4").transpose(semitoneShift).toNote();
+                        display.textContent = `${Math.round(value)} ${unit} - ${note} (${selectedPlanet.tonality || "Mayor"})`;
+                    } else if (s.param.includes('autofilter') || s.param.includes('volumen')) {
+                        display.textContent = `${Math.round(value)} ${unit}`;
+                    } else {
+                        display.textContent = `${value.toFixed(2)}${unit}`;
+                    }
+                    if (audioInitialized && s.updateTone) s.updateTone(value);
+                    updateUI(selectedPlanet);
+                });
+            });
+            playStopBtn.addEventListener('click', togglePlayback);
+            // recordAudioBtn.addEventListener('click', toggleRecording); // Removido
+            exportLoopBtn.addEventListener('click', exportLoopWav); // Añadido
+            generateAnalysisBtn.addEventListener('click', generateAnalysis);
+            exportMidiBtn.addEventListener('click', exportMidi);
+        };
     </script>
 </body>
 
