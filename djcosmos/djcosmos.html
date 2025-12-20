@@ -396,16 +396,31 @@
             return `${note} [${cipher}]`;
         }
 
+        // Normalize oscillator types for offline rendering compatibility
+        function normalizeOscType(type) {
+            const typeMap = {
+                'fat-sawtooth': 'sawtooth',
+                'fat-sine': 'sine',
+                'fmsine': 'sine',
+                'amsine': 'sine'
+            };
+            return typeMap[type] || type;
+        }
+
         function buildAudioChain(context, planet) {
             const rev = new Tone.Freeverb({ roomSize: Math.min(0.9, planet.audio.reverb_decaimiento / 5), dampening: 3000, context: context }).toDestination();
             const cho = new Tone.Chorus({ frequency: 1.5, delayTime: 3.5, depth: planet.audio.chorus_depth, type: 'sine', wet: 0.8, context: context }).connect(rev);
             const af = new Tone.AutoFilter({ frequency: 2, depth: planet.audio.autofilter_depth / 1000, octaves: 2, type: 'sine', context: context }).connect(cho).start();
             const filt = new Tone.Filter({ frequency: planet.audio.filtro_frec, type: 'lowpass', context: context }).connect(af);
 
+            // Use normalized oscillator types for offline rendering compatibility
+            const v0Type = normalizeOscType(planet.synthType.v0);
+            const v1Type = normalizeOscType(planet.synthType.v1);
+
             const syn = new Tone.DuoSynth({
                 vibratoRate: 5, harmonicity: 2.0,
-                voice0: { volume: -10, oscillator: { type: planet.synthType.v0 }, envelope: { attack: 0.01, decay: 0.5, sustain: 0.1, release: 1 } },
-                voice1: { volume: -10, oscillator: { type: planet.synthType.v1 }, envelope: { attack: 0.01, decay: 0.1, sustain: 0.5, release: 1 } },
+                voice0: { volume: -10, oscillator: { type: v0Type }, envelope: { attack: 0.01, decay: 0.5, sustain: 0.1, release: 1 } },
+                voice1: { volume: -10, oscillator: { type: v1Type }, envelope: { attack: 0.01, decay: 0.1, sustain: 0.5, release: 1 } },
                 context: context
             }).connect(filt);
 
